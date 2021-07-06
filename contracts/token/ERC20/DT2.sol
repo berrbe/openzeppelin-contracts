@@ -919,10 +919,13 @@ contract DaisyT2Token is Context, IERC20, Ownable {
     function _reflectFee(uint256 rFee, uint256 tFee) private {
         _rTotal = _rTotal.sub(rFee);
         _tFeeTotal = _tFeeTotal.add(tFee);
+        _DFeeTotal = _DFeeTotal.add(DFee);
+
     }
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
         (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getTValues(tAmount);
+        (uint256 DTransferAmount, uint256 DFee, uint256 tLiquidity) = _getDValues(DAmount);
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, _getRate());
         return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity);
     }
@@ -934,11 +937,11 @@ contract DaisyT2Token is Context, IERC20, Ownable {
         return (tTransferAmount, tFee, tLiquidity);
     }
 
-    function _getTValues(uint256 tAmount) private view returns (uint256, uint256, uint256) {
-        uint256 tFee = calculateDevFee(tAmount);
-        uint256 tLiquidity = calculateLiquidityFee(tAmount);
-        uint256 tTransferAmount = tAmount.sub(tFee).sub(tLiquidity);
-        return (tTransferAmount, tFee, tLiquidity);
+    function _getDValues(uint256 tAmount) private view returns (uint256, uint256, uint256) {
+        uint256 DFee = calculateDevFee(DAmount);
+        uint256 DLiquidity = calculateLiquidityFee(DAmount);
+        uint256 DTransferAmount = DAmount.sub(DFee).sub(DLiquidity);
+        return (DTransferAmount, DFee, DLiquidity);
     }
 
     function _getRValues(uint256 tAmount, uint256 tFee, uint256 tLiquidity, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
