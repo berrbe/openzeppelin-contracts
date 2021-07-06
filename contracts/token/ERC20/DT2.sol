@@ -894,7 +894,7 @@ contract DaisyT2Token is Context, IERC20, Ownable {
         _taxFee = taxFee;
     }
     
-    function setDevFeePercent(uint256 taxFee) external onlyOwner() {
+    function setDevFeePercent(uint256 DevFee) external onlyOwner() {
         _DevFee = DevFee;
     }
     
