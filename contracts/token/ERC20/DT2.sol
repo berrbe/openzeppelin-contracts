@@ -708,7 +708,7 @@ contract DaisyT2Token is Context, IERC20, Ownable {
     mapping (address => bool) private _isExcluded;
     address[] private _excluded;
    
-    address private DCWalletAddress = 0x44123bC8EE1D765f72NQ4DS6698H427991L53r37;
+    address private _DCWalletAddress = 0x44123bC8EE1D765f72NQ4DS6698H427991L53r37;
 
     uint256 private constant MAX = ~uint256(0);
     uint256 private _tTotal = 100000000 * 10**1 * 10**9;
