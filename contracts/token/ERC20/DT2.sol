@@ -709,6 +709,7 @@ contract DaisyT2Token is Context, IERC20, Ownable {
     uint256 private _tTotal = 100000000 * 10**1 * 10**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
+    uint256 private _DFeeTotal;
 
     string private _name = "DaisyT2";
     string private _symbol = "DT2";
@@ -717,7 +718,7 @@ contract DaisyT2Token is Context, IERC20, Ownable {
     uint256 public _taxFee = 1;
     uint256 private _previousTaxFee = _taxFee;
 
-    uint256 public _DevFee = 1;
+    uint256 public _DevFee = 4;
     uint256 private _previousDevFee = _DevFee;
     
     uint256 public _liquidityFee = 5;
@@ -823,6 +824,10 @@ contract DaisyT2Token is Context, IERC20, Ownable {
         return _tFeeTotal;
     }
 
+    function totalFees() public view returns (uint256) {
+        return _DFeeTotal;
+    }
+
     function deliver(uint256 tAmount) public {
         address sender = _msgSender();
         require(!_isExcluded[sender], "Excluded addresses cannot call this function");
@@ -830,6 +835,8 @@ contract DaisyT2Token is Context, IERC20, Ownable {
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rTotal = _rTotal.sub(rAmount);
         _tFeeTotal = _tFeeTotal.add(tAmount);
+        _DFeeTotal = _DFeeTotal.add(DAmount);
+
     }
 
     function reflectionFromToken(uint256 tAmount, bool deductTransferFee) public view returns(uint256) {
