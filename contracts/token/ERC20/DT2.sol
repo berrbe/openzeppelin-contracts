@@ -932,9 +932,10 @@ contract DaisyT2Token is Context, IERC20, Ownable {
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
         (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getTValues(tAmount);
+        _getValues(uint256 DAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
         (uint256 DTransferAmount, uint256 DFee, uint256 tLiquidity) = _getDValues(DAmount);
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, _getRate());
-        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity);
+        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity, DTransferAmount, DFee, DLiquidity);
     }
 
     function _getTValues(uint256 tAmount) private view returns (uint256, uint256, uint256) {
