@@ -1,13 +1,13 @@
 /**
                                                                                                                         
                                                             
-   Daisy Test 2
+   Payback
 
-   #Daisy T2 features:
+   #Payback features:
    5% fee auto add to the liquidity pool to be locked forever when selling
    1% fee auto distribute to all holders
-   1% fee auto distribute to dev team for reinvestment 
-   1% fee auto distribute to charity pool
+   1% fee auto distribute to creator 
+   1% fee Burn
 
 
  */
@@ -693,7 +693,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
-contract DaisyT2 is Context, IERC20, Ownable {
+contract Payback is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -706,23 +706,23 @@ contract DaisyT2 is Context, IERC20, Ownable {
     mapping (address => bool) private _isExcluded;
     address[] private _excluded;
    
-    address private _DaisyPoolWalletAddress = 0x74e08BC79D981FDBAFD7677e6D67057B1DfD460D;
-    address private _CharityPoolWalletAddress = 0xEa2be6C21b8bC7aF1d686f07A0AEd8Ecc31c70fC;
+    address private _CreatorWalletAddress = 0x74e08BC79D981FDBAFD7677e6D67057B1DfD460D;
+    address private _Burn = 0x000000000000000000000000000000000000dEaD;
 
     uint256 private constant MAX = ~uint256(0);
     uint256 private _tTotal = 10000000000 * 10**1 * 10**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "Daisy T2";
+    string private _name = "Payback";
     string private _symbol = "DT2";
     uint8 private _decimals = 9;
     
     uint256 public _taxFee = 1;
     uint256 private _previousTaxFee = _taxFee;
     
-    uint256 public _DaisyPoolFee = 2;
-    uint256 private _previousDaisyPoolFee = _DaisyPoolFee;
+    uint256 public _CreatorPoolFee = 2;
+    uint256 private _previousPaybackPoolFee = _PaybackPoolFee;
     
     uint256 public _liquidityFee = 5;
     uint256 private _previousLiquidityFee = _liquidityFee;
@@ -854,7 +854,7 @@ contract DaisyT2 is Context, IERC20, Ownable {
     }
 
     function excludeFromReward(address account) public onlyOwner() {
-        // require(account != 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, 'We can not exclude Uniswap router.');
+        // require(account != 0xE592427A0AEce92De3Edee1F18E0157C05861564, 'We can not exclude Uniswap router.');
         require(!_isExcluded[account], "Account is already excluded");
         if(_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
@@ -876,13 +876,13 @@ contract DaisyT2 is Context, IERC20, Ownable {
         }
     }
         function _transferBothExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tDaisyPool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tPaybackPool) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _tOwned[recipient] = _tOwned[recipient].add(tTransferAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);        
         _takeLiquidity(tLiquidity);
-        _takeDaisyPool(tDaisyPool);
+        _takePaybackPool(tPaybackPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
@@ -899,8 +899,8 @@ contract DaisyT2 is Context, IERC20, Ownable {
         _taxFee = taxFee;
     }
     
-    function setDaisyPoolFeePercent(uint256 DaisyPoolFee) external onlyOwner() {
-        _DaisyPoolFee = DaisyPoolFee;
+    function setPaybackPoolFeePercent(uint256 PaybackPoolFee) external onlyOwner() {
+        _PaybackPoolFee = PaybackPoolFee;
     }
     
     function setLiquidityFeePercent(uint256 liquidityFee) external onlyOwner() {
@@ -927,25 +927,25 @@ contract DaisyT2 is Context, IERC20, Ownable {
     }
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
-        (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tDaisyPool) = _getTValues(tAmount);
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, tDaisyPool, _getRate());
-        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity, tDaisyPool);
+        (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tPaybackPool) = _getTValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, tPaybackPool, _getRate());
+        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity, tPaybackPool);
     }
 
     function _getTValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256) {
         uint256 tFee = calculateTaxFee(tAmount);
         uint256 tLiquidity = calculateLiquidityFee(tAmount);
-        uint256 tDaisyPool = calculateDaisyPoolFee(tAmount);
-        uint256 tTransferAmount = tAmount.sub(tFee).sub(tLiquidity).sub(tDaisyPool);
-        return (tTransferAmount, tFee, tLiquidity, tDaisyPool);
+        uint256 tPaybackPool = calculatePaybackPoolFee(tAmount);
+        uint256 tTransferAmount = tAmount.sub(tFee).sub(tLiquidity).sub(tPaybackPool);
+        return (tTransferAmount, tFee, tLiquidity, tPaybackPool);
     }
 
-    function _getRValues(uint256 tAmount, uint256 tFee, uint256 tLiquidity, uint256 tDaisyPool, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
+    function _getRValues(uint256 tAmount, uint256 tFee, uint256 tLiquidity, uint256 tPaybackPool, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
         uint256 rAmount = tAmount.mul(currentRate);
         uint256 rFee = tFee.mul(currentRate);
         uint256 rLiquidity = tLiquidity.mul(currentRate);
-        uint256 rDaisyPool = tDaisyPool.mul(currentRate);
-        uint256 rTransferAmount = rAmount.sub(rFee).sub(rLiquidity).sub(rDaisyPool);
+        uint256 rPaybackPool = tPaybackPool.mul(currentRate);
+        uint256 rTransferAmount = rAmount.sub(rFee).sub(rLiquidity).sub(rPaybackPool);
         return (rAmount, rTransferAmount, rFee);
     }
 
@@ -974,15 +974,15 @@ contract DaisyT2 is Context, IERC20, Ownable {
             _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
     }
     
-    function _takeDaisyPool(uint256 tDaisyPool) private {
+    function _takePaybackPool(uint256 tPaybackPool) private {
         uint256 currentRate =  _getRate();
-        uint256 rDaisyPool = tDaisyPool.mul(currentRate);
-        _rOwned[_DaisyPoolWalletAddress] = _rOwned[_DaisyPoolWalletAddress].add(rDaisyPool/2);
-        _rOwned[_CharityPoolWalletAddress] = _rOwned[_CharityPoolWalletAddress].add(rDaisyPool) ;
-        if(_isExcluded[_DaisyPoolWalletAddress])
-            _tOwned[_DaisyPoolWalletAddress] = _tOwned[_DaisyPoolWalletAddress].add(tDaisyPool/2);
-        if(_isExcluded[_CharityPoolWalletAddress])
-            _tOwned[_CharityPoolWalletAddress] = _tOwned[_CharityPoolWalletAddress].add(tDaisyPool);
+        uint256 rPaybackPool = tPaybackPool.mul(currentRate);
+        _rOwned[_CreatorWalletAddress] = _rOwned[_CreatorWalletAddress].add(rPaybackPool/2);
+        _rOwned[_Burn] = _rOwned[_Burn].add(rPaybackPool) ;
+        if(_isExcluded[_CreatorWalletAddress])
+            _tOwned[_CreatorWalletAddress] = _tOwned[_CreatorWalletAddress].add(tPaybackPool/2);
+        if(_isExcluded[_Burn])
+            _tOwned[_Burn] = _tOwned[_Burn].add(tPaybackPool);
     }
     
     function calculateTaxFee(uint256 _amount) private view returns (uint256) {
@@ -991,8 +991,8 @@ contract DaisyT2 is Context, IERC20, Ownable {
         );
     }
     
-    function calculateDaisyPoolFee(uint256 _amount) private view returns (uint256) {
-        return _amount.mul(_DaisyPoolFee).div(
+    function calculatePaybackPoolFee(uint256 _amount) private view returns (uint256) {
+        return _amount.mul(_PaybackPoolFee).div(
             10**2
         );
     }
@@ -1007,17 +1007,17 @@ contract DaisyT2 is Context, IERC20, Ownable {
         if(_taxFee == 0 && _liquidityFee == 0) return;
         
         _previousTaxFee = _taxFee;
-        _previousDaisyPoolFee = _DaisyPoolFee;
+        _previousPaybackPoolFee = _PaybackPoolFee;
         _previousLiquidityFee = _liquidityFee;
         
         _taxFee = 0;
-        _DaisyPoolFee = 0;
+        _PaybackPoolFee = 0;
         _liquidityFee = 0;
     }
     
     function restoreAllFee() private {
         _taxFee = _previousTaxFee;
-        _DaisyPoolFee = _previousDaisyPoolFee;
+        _PaybackPoolFee = _previousPaybackPoolFee;
         _liquidityFee = _previousLiquidityFee;
     }
     
@@ -1157,33 +1157,33 @@ contract DaisyT2 is Context, IERC20, Ownable {
     }
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tDaisyPool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tPaybackPool) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
-        _takeDaisyPool(tDaisyPool);
+        _takePaybackPool(tPaybackPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
     function _transferToExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tDaisyPool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tPaybackPool) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _tOwned[recipient] = _tOwned[recipient].add(tTransferAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);           
         _takeLiquidity(tLiquidity);
-        _takeDaisyPool(tDaisyPool);
+        _takePaybackPool(tPaybackPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
     function _transferFromExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tDaisyPool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 tPaybackPool) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);   
         _takeLiquidity(tLiquidity);
-        _takeDaisyPool(tDaisyPool);
+        _takePaybackPool(tPaybackPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
