@@ -721,7 +721,7 @@ contract Payback is Context, IERC20, Ownable {
     uint256 public _taxFee = 1;
     uint256 private _previousTaxFee = _taxFee;
     
-    uint256 public _CreatorPoolFee = 2;
+    uint256 public _PaybackPoolFee = 2;
     uint256 private _previousPaybackPoolFee = _PaybackPoolFee;
     
     uint256 public _liquidityFee = 5;
