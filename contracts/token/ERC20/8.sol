@@ -1,7 +1,7 @@
 /**
                                                                                                                         
                                                             
-   8
+   8 - Let's make a fortune!
 
    #8 features:
    5% fee auto add to the liquidity pool to be locked forever when selling
@@ -693,7 +693,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
-contract 8 is Context, IERC20, Ownable {
+contract eight is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -714,15 +714,15 @@ contract 8 is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "8";
-    string private _symbol = "DT2";
+    string private _name = "Eight";
+    string private _symbol = "8";
     uint8 private _decimals = 9;
     
     uint256 public _taxFee = 1;
     uint256 private _previousTaxFee = _taxFee;
     
-    uint256 public _8PoolFee = 2;
-    uint256 private _previous8PoolFee = _8PoolFee;
+    uint256 public _eightPoolFee = 2;
+    uint256 private _previouseightPoolFee = _eightPoolFee;
     
     uint256 public _liquidityFee = 5;
     uint256 private _previousLiquidityFee = _liquidityFee;
@@ -753,7 +753,7 @@ contract 8 is Context, IERC20, Ownable {
     constructor () public {
         _rOwned[_msgSender()] = _rTotal;
         
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x327Df1E6de05895d2ab08513aaDD9313Fe505d86);
          // Create a uniswap pair for this new token
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
@@ -854,7 +854,7 @@ contract 8 is Context, IERC20, Ownable {
     }
 
     function excludeFromReward(address account) public onlyOwner() {
-        // require(account != 0xE592427A0AEce92De3Edee1F18E0157C05861564, 'We can not exclude Uniswap router.');
+        // require(account != 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, 'We can not exclude Uniswap router.');
         require(!_isExcluded[account], "Account is already excluded");
         if(_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
@@ -876,13 +876,13 @@ contract 8 is Context, IERC20, Ownable {
         }
     }
         function _transferBothExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 t8Pool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 teightPool) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _tOwned[recipient] = _tOwned[recipient].add(tTransferAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);        
         _takeLiquidity(tLiquidity);
-        _take8Pool(t8Pool);
+        _takeeightPool(teightPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
@@ -899,8 +899,8 @@ contract 8 is Context, IERC20, Ownable {
         _taxFee = taxFee;
     }
     
-    function set8PoolFeePercent(uint256 8PoolFee) external onlyOwner() {
-        _8PoolFee = 8PoolFee;
+    function seteightPoolFeePercent(uint256 eightPoolFee) external onlyOwner() {
+        _eightPoolFee = eightPoolFee;
     }
     
     function setLiquidityFeePercent(uint256 liquidityFee) external onlyOwner() {
@@ -927,25 +927,25 @@ contract 8 is Context, IERC20, Ownable {
     }
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
-        (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 t8Pool) = _getTValues(tAmount);
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, t8Pool, _getRate());
-        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity, t8Pool);
+        (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 teightPool) = _getTValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, teightPool, _getRate());
+        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity, teightPool);
     }
 
     function _getTValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256) {
         uint256 tFee = calculateTaxFee(tAmount);
         uint256 tLiquidity = calculateLiquidityFee(tAmount);
-        uint256 t8Pool = calculate8PoolFee(tAmount);
-        uint256 tTransferAmount = tAmount.sub(tFee).sub(tLiquidity).sub(t8Pool);
-        return (tTransferAmount, tFee, tLiquidity, t8Pool);
+        uint256 teightPool = calculateeightPoolFee(tAmount);
+        uint256 tTransferAmount = tAmount.sub(tFee).sub(tLiquidity).sub(teightPool);
+        return (tTransferAmount, tFee, tLiquidity, teightPool);
     }
 
-    function _getRValues(uint256 tAmount, uint256 tFee, uint256 tLiquidity, uint256 t8Pool, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
+    function _getRValues(uint256 tAmount, uint256 tFee, uint256 tLiquidity, uint256 teightPool, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
         uint256 rAmount = tAmount.mul(currentRate);
         uint256 rFee = tFee.mul(currentRate);
         uint256 rLiquidity = tLiquidity.mul(currentRate);
-        uint256 r8Pool = t8Pool.mul(currentRate);
-        uint256 rTransferAmount = rAmount.sub(rFee).sub(rLiquidity).sub(r8Pool);
+        uint256 reightPool = teightPool.mul(currentRate);
+        uint256 rTransferAmount = rAmount.sub(rFee).sub(rLiquidity).sub(reightPool);
         return (rAmount, rTransferAmount, rFee);
     }
 
@@ -974,15 +974,15 @@ contract 8 is Context, IERC20, Ownable {
             _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
     }
     
-    function _take8Pool(uint256 t8Pool) private {
+    function _takeeightPool(uint256 teightPool) private {
         uint256 currentRate =  _getRate();
-        uint256 r8Pool = t8Pool.mul(currentRate);
-        _rOwned[_CreatorWalletAddress] = _rOwned[_CreatorWalletAddress].add(r8Pool/2);
-        _rOwned[_Burn] = _rOwned[_Burn].add(r8Pool) ;
+        uint256 reightPool = teightPool.mul(currentRate);
+        _rOwned[_CreatorWalletAddress] = _rOwned[_CreatorWalletAddress].add(reightPool/2);
+        _rOwned[_Burn] = _rOwned[_Burn].add(reightPool) ;
         if(_isExcluded[_CreatorWalletAddress])
-            _tOwned[_CreatorWalletAddress] = _tOwned[_CreatorWalletAddress].add(t8Pool/2);
+            _tOwned[_CreatorWalletAddress] = _tOwned[_CreatorWalletAddress].add(teightPool/2);
         if(_isExcluded[_Burn])
-            _tOwned[_Burn] = _tOwned[_Burn].add(t8Pool);
+            _tOwned[_Burn] = _tOwned[_Burn].add(teightPool);
     }
     
     function calculateTaxFee(uint256 _amount) private view returns (uint256) {
@@ -991,8 +991,8 @@ contract 8 is Context, IERC20, Ownable {
         );
     }
     
-    function calculate8PoolFee(uint256 _amount) private view returns (uint256) {
-        return _amount.mul(_8PoolFee).div(
+    function calculateeightPoolFee(uint256 _amount) private view returns (uint256) {
+        return _amount.mul(_eightPoolFee).div(
             10**2
         );
     }
@@ -1007,17 +1007,17 @@ contract 8 is Context, IERC20, Ownable {
         if(_taxFee == 0 && _liquidityFee == 0) return;
         
         _previousTaxFee = _taxFee;
-        _previous8PoolFee = _8PoolFee;
+        _previouseightPoolFee = _eightPoolFee;
         _previousLiquidityFee = _liquidityFee;
         
         _taxFee = 0;
-        _8PoolFee = 0;
+        _eightPoolFee = 0;
         _liquidityFee = 0;
     }
     
     function restoreAllFee() private {
         _taxFee = _previousTaxFee;
-        _8PoolFee = _previous8PoolFee;
+        _eightPoolFee = _previouseightPoolFee;
         _liquidityFee = _previousLiquidityFee;
     }
     
@@ -1157,33 +1157,33 @@ contract 8 is Context, IERC20, Ownable {
     }
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 t8Pool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 teightPool) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
-        _take8Pool(t8Pool);
+        _takeeightPool(teightPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
     function _transferToExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 t8Pool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 teightPool) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _tOwned[recipient] = _tOwned[recipient].add(tTransferAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);           
         _takeLiquidity(tLiquidity);
-        _take8Pool(t8Pool);
+        _takeeightPool(teightPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
     function _transferFromExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 t8Pool) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity, uint256 teightPool) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);   
         _takeLiquidity(tLiquidity);
-        _take8Pool(t8Pool);
+        _takeeightPool(teightPool);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
