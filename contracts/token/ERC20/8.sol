@@ -710,7 +710,7 @@ contract eight is Context, IERC20, Ownable {
     address private _Burn = 0x000000000000000000000000000000000000dEaD;
 
     uint256 private constant MAX = ~uint256(0);
-    uint256 private _tTotal = 10000000000 * 10**1 * 10**9;
+    uint256 private _tTotal = 10000000 * 7**1 * 7**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
